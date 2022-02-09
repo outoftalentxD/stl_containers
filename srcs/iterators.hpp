@@ -13,8 +13,8 @@ namespace ft {
         typedef Reference   reference;
     };
 
-    template<class T>
-    class OwnIterator : public iterator<random_access_iterator_tag, T> {
+    template<class T, class Pointer = T*, class Reference = T&, class Distance = std::ptrdiff_t>
+    class OwnIterator : public iterator<random_access_iterator_tag, T, Pointer, Reference, Distance> {
         public:
             typedef iterator<random_access_iterator_tag, T> iter;
             typedef typename iter::pointer pointer;
