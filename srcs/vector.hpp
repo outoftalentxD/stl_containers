@@ -10,22 +10,25 @@ namespace ft {
         public:
             typedef typename Allocator::value_type value_type;
             typedef Allocator allocator_type;
-            
+
             typedef typename Allocator::pointer pointer;
             typedef typename Allocator::const_pointer const_pointer;
 
             typedef typename Allocator::reference reference;
             typedef typename Allocator::const_reference const_reference;
-            
+
             typedef OwnIterator<T, pointer, reference> iterator;
             typedef OwnIterator<T, const_pointer, const_reference> const_iterator;
+
+            typedef ft::reverse_iterator<iterator> reverse_iterator;
+            typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
             typedef typename iterator_traits<iterator>::difference_type difference_type;
             typedef typename Allocator::size_type size_type;
 
         public:
             explicit vector(const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0), _allocator(allocator), _begin(), _end() {
-                
+
             }
 
             explicit vector(size_type size, const_reference value = value_type(), const allocator_type& allocator = allocator_type())
@@ -49,7 +52,7 @@ namespace ft {
 
             template<class InputIt>
             vector(InputIt first, InputIt last, const allocator_type& allocator = allocator_type()) {
-                
+
             }
 
             vector& operator=(const vector& oth) {
@@ -94,7 +97,7 @@ namespace ft {
                 }
                 return *(_begin + pos);
             }
-            
+
             const_reference at(size_type pos) const {
                 if (pos >= _size) {
                     throw std::out_of_range("Index out of range");
@@ -113,7 +116,7 @@ namespace ft {
             reference front() {
                 return _begin[0];
             }
-            
+
             const_reference fron() const {
                 return _begin[0];
             }
@@ -143,7 +146,7 @@ namespace ft {
             size_type size() const {
                 return _size;
             }
-            
+
             size_type max_size() const {
                 return allocator_type().max_size();
             }
@@ -192,7 +195,21 @@ namespace ft {
                 return (const_iterator)_end;
             }
 
-            
+            reverse_iterator rbegin() {
+                return --_end;
+            }
+
+            reverse_iterator rend() {
+                return _begin;
+            }
+
+            const_reverse_iterator rbegin() const {
+                return --end();
+            }
+
+            const_reverse_iterator rend() const {
+                return _begin();
+            }
 
         private:
             void _reallocate(size_t size) {
