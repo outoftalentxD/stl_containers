@@ -4,6 +4,7 @@
 #include "iterators.hpp"
 #include "iterators_traits.hpp"
 
+
 namespace ft {
     template<class T, class Allocator = std::allocator<T> >
     class vector {
@@ -117,7 +118,7 @@ namespace ft {
                 return _begin[0];
             }
 
-            const_reference fron() const {
+            const_reference front() const {
                 return _begin[0];
             }
 
@@ -169,14 +170,6 @@ namespace ft {
                 return _capacity;
             }
 
-            void clear() {
-                for (size_t i = 0; i < _size; i++) {
-                    _allocator.destroy(_begin + i);
-                }
-                _size = 0;
-                _end = _begin;
-            }
-
         /* Iterators */
         public:
             iterator begin() {
@@ -210,6 +203,109 @@ namespace ft {
             const_reverse_iterator rend() const {
                 return _begin();
             }
+
+        /* Modifiers */
+        public:
+            void clear() {
+                for (size_t i = 0; i < _size; i++) {
+                    _allocator.destroy(_begin + i);
+                }
+                _size = 0;
+                _end = _begin;
+            }
+
+            iterator insert( iterator pos, const T& value ) {
+                size_type index = pos - begin();
+                _reallocate(++_size);
+                size_t i = _size - 1;
+                iterator it = begin();
+                while (i > index) {
+                    *(it + i) = *(it + i - 1);
+                    --i;
+                }
+                *(it + i) = value;
+                return (it + i);
+            }
+
+            void insert( iterator pos, size_type count, const T& value ) {
+                size_t i = _size - 1;
+                size_t index = pos - begin();
+                _reallocate(_size + count);
+                _size += count;
+                size_t j = _size - 1;
+                iterator it = begin();
+                while (i >= index) {
+                    *(it + j) = *(it + i);
+                    --j;
+                    if (i == 0) {
+                        break ;
+                    }
+                    --i;
+                }
+                while (count) {
+                    *(it + j) = value;
+                    --j; --count;
+                }
+            }
+
+            template< class InputIt >
+            void insert( iterator pos, InputIt first, InputIt last ) {
+                size_t count = last - first;
+                size_t i = _size - 1;
+                size_t index = pos - begin();
+                _reallocate(_size + count);
+                _size += count;
+                size_t j = _size - 1;
+                iterator it = begin();
+                while (i >= index) {
+                    *(it + j) = *(it + i);
+                    --j;
+                    if (i == 0) {
+                        break ;
+                    }
+                    --i;
+                }
+                while (count) {
+                    *(it + j) = *(last - 1);
+                    --j; --count; --last;
+                }
+            }
+
+            void push_back( const T& value ) {
+                _reallocate(++_size);
+                *(--end()) = value;
+            }
+
+            void pop_back() {
+                if (_size) {
+                    _size--;
+                }
+            }
+
+            void resize( size_type count, T value = T() ) {
+                if (count < _size) {
+                    _size = count;
+                } else {
+                    _reallocate(count);
+                    iterator it = begin() + _size;
+                    _size = count;
+                    _end = _begin + _size;
+                    std::cout << end() - begin();
+                    while (it != end()) {
+                        std::cout << value << std::endl;
+                        *it = value;
+                        ++it;
+                    }
+                }
+            }
+
+            void swap( vector& other ) {
+                std::swap(*this, other);
+            }
+
+
+
+
 
         private:
             void _reallocate(size_t size) {
@@ -245,4 +341,6 @@ namespace ft {
             allocator_type _allocator;
 
     };
+
+
 }

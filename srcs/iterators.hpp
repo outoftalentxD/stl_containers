@@ -19,6 +19,7 @@ namespace ft {
             typedef iterator<random_access_iterator_tag, T> iter;
             typedef typename iter::pointer pointer;
             typedef typename iter::reference reference;
+            typedef typename iter::difference_type difference_type;
 
         public:
             OwnIterator(pointer ptr = nullptr) : _ptr(ptr) {
@@ -41,16 +42,19 @@ namespace ft {
             }
 
         public:
+            OwnIterator& base() {
+                return *this;
+            }
 
             OwnIterator& operator++(void) {
                 _ptr++;
                 return (*this);
             }
 
-            OwnIterator operator++(int) const {
+            OwnIterator operator++(int) {
                 OwnIterator ret(*this);
 
-                ret._ptr++;
+                ++_ptr;
                 return (ret);
             }
 
@@ -59,7 +63,7 @@ namespace ft {
                 return *this;
             }
 
-            OwnIterator& operator+(int n) const {
+            OwnIterator operator+(int n) const {
                 OwnIterator ret(*this);
 
                 ret._ptr += n;
@@ -71,10 +75,10 @@ namespace ft {
                 return *this;
             }
 
-            OwnIterator operator--(int) const {
+            OwnIterator operator--(int) {
                 OwnIterator ret(*this);
 
-                ret._ptr--;
+                --_ptr;
                 return ret;
             }
 
@@ -83,11 +87,15 @@ namespace ft {
                 return *this;
             }
 
-            OwnIterator& operator-(int n) const {
+            OwnIterator operator-(int n) const {
                 OwnIterator ret(*this);
 
                 ret._ptr -= n;
                 return ret;
+            }
+
+            difference_type operator-(const OwnIterator<T>& rhs) {
+                return std::distance(rhs._ptr, _ptr);
             }
 
             reference operator*() const {
@@ -132,7 +140,6 @@ namespace ft {
     class reverse_iterator {
         public:
             typedef Iter                            iterator_type;
-            // typedef typename iterator_traits<Iter>           traits_type;
             typedef typename iterator_traits<Iter>::iterator_category  iterator_category;
             typedef typename iterator_traits<Iter>::value_type         value_type;
             typedef typename iterator_traits<Iter>::difference_type    difference_type;
