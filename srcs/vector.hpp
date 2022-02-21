@@ -52,8 +52,16 @@ namespace ft {
             }
 
             template<class InputIt>
-            vector(InputIt first, InputIt last, const allocator_type& allocator = allocator_type()) {
+            vector(InputIt first, InputIt last, const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0), _allocator(allocator), _begin(), _end() {
+                size_t count = last - first;
+                _reallocate(count);
+                _resize(count);
+                iterator it = begin();
 
+                while (first != last) {
+                    *it = *first;
+                    ++it; ++first;
+                }
             }
 
             vector& operator=(const vector& oth) {
@@ -63,10 +71,10 @@ namespace ft {
                     _capacity = oth._capacity;
                     _allocator = oth._allocator;
 
-                    _begin = _allocator.allocate(_begin, _capacity);
+                    _begin = _allocator.allocate(_capacity);
                     _end = _begin + _size;
                     for (size_type i = 0; i < _size; i++) {
-                        _allocator.construct(_begin, oth[i]);
+                        _allocator.construct(_begin + i, oth[i]);
                     }
                 }
                 return (*this);
@@ -271,6 +279,34 @@ namespace ft {
                 }
             }
 
+            iterator erase( iterator pos ) {
+                iterator ret = (pos != end() ? pos : end());
+
+                while (pos != end()) {
+                    *pos = *(pos + 1);
+                    ++pos;
+                }
+                if (ret != end()) {
+                    _resize(-1);
+                }
+                return ret;
+            }
+
+            iterator erase( iterator first, iterator last ) {
+                if (first <= last) {
+                    size_t count = last - first;
+                    size_t index = first - begin();
+
+                    while(first != end()) {
+                        *first = *(first + count);
+                        ++first;
+                    }
+                    _resize(-count);
+                    return begin() + index;
+                }
+                return first;
+            }
+
             void push_back( const T& value ) {
                 _reallocate(++_size);
                 *(--end()) = value;
@@ -278,7 +314,7 @@ namespace ft {
 
             void pop_back() {
                 if (_size) {
-                    _size--;
+                    _resize(-1);
                 }
             }
 
@@ -290,9 +326,7 @@ namespace ft {
                     iterator it = begin() + _size;
                     _size = count;
                     _end = _begin + _size;
-                    std::cout << end() - begin();
                     while (it != end()) {
-                        std::cout << value << std::endl;
                         *it = value;
                         ++it;
                     }
@@ -303,13 +337,8 @@ namespace ft {
                 std::swap(*this, other);
             }
 
-
-
-
-
         private:
             void _reallocate(size_t size) {
-
                 if (size < _size) //is this good decision?
                     return ;
                 size_type old_cap = _capacity;
@@ -332,7 +361,10 @@ namespace ft {
                 _begin = begin;
                 _end = begin + _size;
             }
-
+            void _resize(size_t n) {
+                _size += n;
+                _end = _begin + _size;
+            }
         private:
             size_type _size;
             size_type _capacity;
@@ -342,5 +374,41 @@ namespace ft {
 
     };
 
+    template< class T, class Alloc >
+    bool operator==( const ft::vector<T,Alloc>& lhs,
+                    const ft::vector<T,Alloc>& rhs ) {
+        return equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
 
-}
+    template< class T, class Alloc >
+    bool operator != (const ft::vector<T, Alloc>& lhs,
+                        const ft::vector<T, Alloc>& rhs ) {
+        return !equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+
+    template< class T, class Alloc >
+    bool operator<( const ft::vector<T,Alloc>& lhs,
+                    const ft::vector<T,Alloc>& rhs ) {
+        return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+
+    template< class T, class Alloc >
+    bool operator<=( const ft::vector<T,Alloc>& lhs,
+                    const ft::vector<T,Alloc>& rhs ) {
+        return (lhs < rhs || lhs == rhs);
+    }
+
+
+    template< class T, class Alloc >
+    bool operator>( const ft::vector<T,Alloc>& lhs,
+                    const ft::vector<T,Alloc>& rhs ) {
+        return !(lhs <= rhs);
+    }
+
+    template< class T, class Alloc >
+    bool operator>=( const ft::vector<T,Alloc>& lhs,
+                    const ft::vector<T,Alloc>& rhs ) {
+        return !(lhs < rhs);
+    }
+
+} //namespace ft
