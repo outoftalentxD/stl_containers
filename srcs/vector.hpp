@@ -131,11 +131,11 @@ namespace ft {
             }
 
             reference back() {
-                return _end[0];
+                return *(_end - 1);
             }
 
             const_reference back() const {
-                return _end[0];
+                return *(_end - 1);
             }
 
             pointer data() {
@@ -197,19 +197,19 @@ namespace ft {
             }
 
             reverse_iterator rbegin() {
-                return --_end;
+                return end();
             }
 
             reverse_iterator rend() {
-                return _begin;
+                return begin();
             }
 
             const_reverse_iterator rbegin() const {
-                return --end();
+                return end();
             }
 
             const_reverse_iterator rend() const {
-                return _begin();
+                return begin();
             }
 
         /* Modifiers */
@@ -309,7 +309,7 @@ namespace ft {
 
             void push_back( const T& value ) {
                 _reallocate(++_size);
-                *(--end()) = value;
+                back() = value;
             }
 
             void pop_back() {
@@ -336,7 +336,8 @@ namespace ft {
             void swap( vector& other ) {
                 std::swap(*this, other);
             }
-
+            
+        /* private utility */
         private:
             void _reallocate(size_t size) {
                 if (size < _size) //is this good decision?
@@ -365,6 +366,7 @@ namespace ft {
                 _size += n;
                 _end = _begin + _size;
             }
+
         private:
             size_type _size;
             size_type _capacity;
