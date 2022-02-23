@@ -55,7 +55,7 @@ namespace ft {
     /* algorithm */
     template<class InputIt>
     typename iterator_traits<InputIt>::difference_type distance(InputIt first, InputIt last) {
-        typename iterator_traits<InputIt>::difference_type diff;
+        typename iterator_traits<InputIt>::difference_type diff = 0;
         while (first != last) {
             ++diff; ++first;
         }
@@ -92,6 +92,8 @@ namespace ft {
     template<> struct is_integral<unsigned long> : public integral_constant<unsigned long, true> {};
     template<> struct is_integral<unsigned long long> : public integral_constant<unsigned long long, true> {};
 
-
+    /* enable_if */
+    template<bool B, class T = void> struct enable_if {};
+    template<class T> struct enable_if<true, T> { typedef T type; };
 
 } //namespace ft
