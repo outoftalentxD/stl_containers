@@ -4,7 +4,6 @@
 #include "iterators.hpp"
 #include "iterators_traits.hpp"
 
-
 namespace ft {
     template<class T, class Allocator = std::allocator<T> >
     class vector {
@@ -224,7 +223,8 @@ namespace ft {
 
             iterator insert( iterator pos, const T& value ) {
                 size_type index = pos - begin();
-                _reallocate(++_size);
+                _reallocate(_size + 1);
+                _resize(_size + 1);
                 size_t i = _size - 1;
                 iterator it = begin();
                 while (i > index) {
@@ -239,7 +239,7 @@ namespace ft {
                 size_t i = _size - 1;
                 size_t index = pos - begin();
                 _reallocate(_size + count);
-                _size += count;
+                _resize(_size + count);
                 size_t j = _size - 1;
                 iterator it = begin();
                 while (i >= index) {
@@ -262,7 +262,7 @@ namespace ft {
                 size_t i = _size - 1;
                 size_t index = pos - begin();
                 _reallocate(_size + count);
-                _size += count;
+                _resize(_size + count);
                 size_t j = _size - 1;
                 iterator it = begin();
                 while (i >= index) {
@@ -287,7 +287,7 @@ namespace ft {
                     ++pos;
                 }
                 if (ret != end()) {
-                    _resize(-1);
+                    _resize(_size - 1);
                 }
                 return ret;
             }
@@ -301,7 +301,7 @@ namespace ft {
                         *first = *(first + count);
                         ++first;
                     }
-                    _resize(-count);
+                    _resize(_size - count);
                     return begin() + index;
                 }
                 return first;
@@ -314,7 +314,7 @@ namespace ft {
 
             void pop_back() {
                 if (_size) {
-                    _resize(-1);
+                    _resize(_size - 1);
                 }
             }
 
@@ -324,8 +324,7 @@ namespace ft {
                 } else {
                     _reallocate(count);
                     iterator it = begin() + _size;
-                    _size = count;
-                    _end = _begin + _size;
+                    _resize(count);
                     while (it != end()) {
                         *it = value;
                         ++it;
@@ -334,9 +333,9 @@ namespace ft {
             }
 
             void swap( vector& other ) {
-                std::swap(*this, other);
+                ft::swap(*this, other);
             }
-            
+
         /* private utility */
         private:
             void _reallocate(size_t size) {
@@ -362,8 +361,9 @@ namespace ft {
                 _begin = begin;
                 _end = begin + _size;
             }
+
             void _resize(size_t n) {
-                _size += n;
+                _size = n;
                 _end = _begin + _size;
             }
 
@@ -391,7 +391,7 @@ namespace ft {
     template< class T, class Alloc >
     bool operator<( const ft::vector<T,Alloc>& lhs,
                     const ft::vector<T,Alloc>& rhs ) {
-        return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+        return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     }
 
     template< class T, class Alloc >

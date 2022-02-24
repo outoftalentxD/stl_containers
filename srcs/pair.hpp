@@ -64,22 +64,21 @@ namespace ft {
                 return false;
             }
         }
-
     }
 
     template<class F, class S>
     bool operator<=(const pair<F, S>& lhs, const pair<F, S>& rhs) {
-        return (lhs.first == rhs.first || lhs.second < rhs.second);
+        return (lhs == rhs || lhs < rhs);
     }
 
     template<class F, class S>
     bool operator>(const pair<F, S>& lhs, const pair<F, S>& rhs) {
-        return !(lhs.first <= rhs.first);
+        return !(lhs <= rhs);
     }
 
     template<class F, class S>
     bool operator>=(const pair<F, S>& lhs, const pair<F, S>& rhs) {
-        return !(lhs.first < rhs.first);
+        return !(lhs < rhs);
     }
 
     template<class F, class S>

@@ -5,12 +5,36 @@
 
 namespace ft {
 
+    /* algorithm */
+    template<class InputIt>
+    typename iterator_traits<InputIt>::difference_type distance(InputIt first, InputIt last) {
+        typename iterator_traits<InputIt>::difference_type diff = 0;
+        while (first != last) {
+            ++diff; ++first;
+        }
+        return diff;
+    }
+
+    template<class T>
+    void swap(T& a, T& b) {
+        T temp = a;
+        a = b;
+        b = temp;
+    }
+
+    template<class T>
+    struct less {
+        bool operator()(const T& lhs, const T& rhs) const {
+            return (lhs < rhs);
+        }
+    };
+
     /* lexicographical_compare */
     template< class InputIt1, class InputIt2 >
     bool lexicographical_compare( InputIt1 first1, InputIt1 last1,
                                 InputIt2 first2, InputIt2 last2 ) {
-        size_t size1 = last1 - first1;
-        size_t size2 = last2 - first2;
+        size_t size1 = ft::distance(first1, last1);
+        size_t size2 = ft::distance(first2, last2);
         for ( ; first1 != last1 && first2 != last2; ) {
             if (*first1 >= *first2) {
                 return false;
@@ -23,9 +47,9 @@ namespace ft {
     template< class InputIt1, class InputIt2, class Compare >
     bool lexicographical_compare( InputIt1 first1, InputIt1 last1,
                               InputIt2 first2, InputIt2 last2,
-                              Compare comp ) {
-        size_t size1 = last1 - first1;
-        size_t size2 = last2 - first2;
+                              Compare comp) {
+        size_t size1 = ft::distance(first1, last1);
+        size_t size2 = ft::distance(first2, last2);
         for ( ; first1 != last1 && first2 != last2; ) {
             if (!comp(*first1, *first2)) {
                 return false;
@@ -39,8 +63,8 @@ namespace ft {
     template< class InputIt1, class InputIt2 >
     bool equal( InputIt1 first1, InputIt1 last1,
                 InputIt2 first2, InputIt2 last2) {
-        size_t size1 = last1 - first1;
-        size_t size2 = last2 - first2;
+        size_t size1 = ft::distance(first1, last1);
+        size_t size2 = ft::distance(first2, last2);
         if (size1 == size2) {
             for (; first1 != last1 && first2 != last2;) {
                 if (*first1 != *first2)
@@ -64,23 +88,6 @@ namespace ft {
             }
         }
         return (size1 == size2);
-    }
-
-    /* algorithm */
-    template<class InputIt>
-    typename iterator_traits<InputIt>::difference_type distance(InputIt first, InputIt last) {
-        typename iterator_traits<InputIt>::difference_type diff = 0;
-        while (first != last) {
-            ++diff; ++first;
-        }
-        return diff;
-    }
-
-    template<class T>
-    void swap(T& a, T& b) {
-        T temp = a;
-        a = b;
-        b = temp;
     }
 
     /* is_integral */
