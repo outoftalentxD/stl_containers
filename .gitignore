@@ -2,7 +2,9 @@
 app
 app.sh
 test.sh
+dtest.sh
 main_test.cpp
+ducha.cpp
 
 # VSCode configuration files
 .vscode/
