@@ -73,6 +73,7 @@ namespace ft {
             if (this != &other) {
                 _pnode = other._pnode;
             }
+            return *this;
         }
 
     public:
@@ -98,14 +99,16 @@ namespace ft {
                     _pnode = parent;
                     parent = _pnode->parent;
                 }
-                _pnode = _pnode->parent;
+                if (parent) {
+                    _pnode = parent;
+                }
             }
             return *this;
         }
 
         TreapIter operator++(int) {
             TreapIter<value_type> temp = *this;
-            std::cout << "here\n";
+
             if (_pnode->right) {
                 _pnode = _treap_subtree_min(_pnode->right);
             } else {
@@ -114,7 +117,9 @@ namespace ft {
                     _pnode = parent;
                     parent = _pnode->parent;
                 }
-                _pnode = _pnode->parent;
+                if (parent) {
+                    _pnode = parent;
+                }
             }
             return temp;
         }
@@ -128,7 +133,9 @@ namespace ft {
                     _pnode = parent;
                     parent = _pnode->parent;
                 }
-                _pnode = _pnode->parent;
+                if (parent) {
+                    _pnode = parent;
+                }
             }
             return *this;
         }
@@ -143,7 +150,9 @@ namespace ft {
                     _pnode = parent;
                     parent = _pnode->parent;
                 }
-                _pnode = _pnode->parent;
+                if (parent) {
+                    _pnode = parent;
+                }
             }
             return temp;
         }
@@ -230,17 +239,21 @@ namespace ft {
 
     public:
         void push(const value_type& value) {
-            node_pointer pnode = _search(_root, value);
-            if (pnode) {
-                pnode->value.second = value.second;
-            } else {
-                if (_root) {
-                    _root->parent = nullptr;
-                }
-                _insert(_root, _create_node(value));
-                _assign_header(_root);
+            _insert(_root, _create_node(value));
+        }
+
+        void print(const node_pointer treap) const {
+            if (treap) {
+                print(treap->left);
+                std::cout << treap->value.first << std::endl;
+                print(treap->right);
             }
         }
+
+        void find(const value_type& value) const {
+            print(_root);
+        }
+
 
     /* iterators */
     public:
@@ -258,19 +271,6 @@ namespace ft {
 
         const_iterator end() const {
             return const_iterator(_header);
-        }
-
-
-    public:
-        void print(const node_pointer treap) const {
-            if (treap) {
-                print(treap->left);
-                std::cout << treap->value.first << std::endl;
-                print(treap->right);
-            }
-        }
-        void find(const value_type& value) const {
-            print(_root);
         }
 
     private:
@@ -308,45 +308,21 @@ namespace ft {
             }
         }
 
-        void _insert(node_pointer& treap, node_pointer node) {
+        void _insert(node_pointer& treap, node_pointer node, node_pointer prevNode = nullptr) {
             if (!treap) {
                 treap = node;
-                _header->left = treap; _header->right = treap;
-                treap->parent = _header;
-            } else if (node->weight > treap->weight) {
-                _split(treap, node->value, node->left, node->right);
-                treap = node;
-                _assign_parents(treap, treap->left, treap->right);
+                if (prevNode) {
+                    treap->parent = prevNode;
+                } else {
+                    treap->parent = _header;
+                    _header->right = _header->left = treap;
+                }
             } else {
                 if (_cmp(node->value, treap->value)) {
-                    _insert(treap->left, node);
-                } else {
-                    _insert(treap->right, node);
+                    _insert(treap->left, node, treap);
+                } else if (_cmp(treap->value, node->value)) {
+                    _insert(treap->right, node, treap);
                 }
-            }
-        }
-
-        void _split(node_pointer treap, value_type& value, node_pointer& left, node_pointer& right) {
-            if (!treap) {
-                left = right = nullptr;
-            } else if (_cmp(value, treap->value)) {
-                _split(treap->left, value, left, treap->left);
-                right = treap;
-            } else {
-                _split(treap->right, value, treap->right, right);
-                left = treap;
-            }
-        }
-
-        void _merge(node_pointer& treap, node_pointer left, node_pointer right) {
-            if (!left || !right) {
-                treap = left ? left : right;
-            } else if (left->weight > right->weight) {
-                _merge(left->right, left->right, right);
-                treap = left;
-            } else {
-                _merge(right->left, left, right->left);
-                treap = right;
             }
         }
 
@@ -357,19 +333,6 @@ namespace ft {
                 _node_allocator.destroy(root);
                 _node_allocator.deallocate(root, 1);
             }
-        }
-        void _assign_parents(node_pointer treap, node_pointer left, node_pointer right) {
-            if (left) {
-                left->parent = treap;
-            }
-            if (right) {
-                right->parent = treap;
-            }
-        }
-
-        void _assign_header(node_pointer _root) {
-            _root->parent = _header;
-            _header->left = _header->right = _root;
         }
 
     private:
