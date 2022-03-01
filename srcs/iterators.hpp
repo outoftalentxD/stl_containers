@@ -5,7 +5,7 @@
 #include "algorithm.hpp"
 
 namespace ft {
-    template <class Category, class T, class Distance = std::ptrdiff_t, class Pointer = T*, class Reference = T&>
+    template <class T, class Category, class Pointer = T*, class Reference = T&, class Distance = std::ptrdiff_t>
     struct iterator {
         typedef Category    iterator_category;
         typedef T           value_type;
@@ -15,12 +15,12 @@ namespace ft {
     };
 
     template<class T, class Pointer = T*, class Reference = T&, class Distance = std::ptrdiff_t>
-    class OwnIterator : public iterator<random_access_iterator_tag, T, Pointer, Reference, Distance> {
+    class OwnIterator : public iterator<T, random_access_iterator_tag, Pointer, Reference, Distance> {
         public:
-            typedef iterator<random_access_iterator_tag, T> iter;
-            typedef typename iter::pointer pointer;
-            typedef typename iter::reference reference;
-            typedef typename iter::difference_type difference_type;
+            // typedef iterator<T, random_access_iterator_tag> iter;
+            typedef Pointer pointer;
+            typedef Reference reference;
+            typedef Distance difference_type;
 
         public:
             OwnIterator(pointer ptr = nullptr) : _ptr(ptr) {
@@ -106,6 +106,10 @@ namespace ft {
             pointer operator->() const {
                 return _ptr;
             }
+
+            // operator OwnIterator<T, const T*, const T&>() {
+            //     return OwnIterator<T, const T*, const T&>(_ptr);
+            // }
 
             bool operator==(const OwnIterator& rhs) const {
                 return _ptr == rhs._ptr;

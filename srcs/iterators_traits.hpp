@@ -10,7 +10,7 @@ namespace ft {
     struct bidirectional_iterator_tag : public forward_iterator_tag { };
     struct random_access_iterator_tag : public bidirectional_iterator_tag { };
 
-    template <class Iter>
+    template <class Iter, class IteratorCategory = random_access_iterator_tag>
     struct iterator_traits {
         typedef typename Iter::difference_type   difference_type;
         typedef typename Iter::value_type        value_type;

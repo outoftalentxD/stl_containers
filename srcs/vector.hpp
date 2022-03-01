@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "algorithm.hpp"
 #include "iterators.hpp"
 #include "iterators_traits.hpp"
 
@@ -32,10 +33,10 @@ namespace ft {
             }
 
             explicit vector(size_type size, const_reference value = value_type(), const allocator_type& allocator = allocator_type())
-                    : _allocator(allocator), _size(size), _begin(), _end() {
+                    : _allocator(allocator), _size(size), _begin(), _end(), _capacity(0){
                 if (size > 0) {
                     _reallocate(size);
-                    for (size_type i = 0; i < size; i++) {
+                    for (size_type i = 0; i < size; ++i) {
                         _allocator.construct(_begin + i, value);
                     }
                     _end = _begin + size;
@@ -84,13 +85,23 @@ namespace ft {
                 _allocator.deallocate(_begin, _capacity);
             }
 
-            void assign(size_type count, const_reference value) {
+            void assign(size_t count, const_reference value) {
                 _reallocate(count);
-                _size = count;
+                _resize(count);
                 for (size_type i = 0; i < _size; i++) {
                     *(_begin + i) = value;
                 }
                 _end = _begin + _size;
+            }
+
+            template< class InputIt >
+            void assign( InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last) {
+                difference_type count = last - first;
+                _reallocate(count);
+                _resize(count);
+                for (iterator it = begin(); first != last; ++first, ++it) {
+                    *it = *first;
+                }
             }
 
             allocator_type get_allocator() const {
@@ -339,25 +350,24 @@ namespace ft {
         /* private utility */
         private:
             void _reallocate(size_t size) {
-                if (size < _size) //is this good decision?
+                if (size < _capacity) {
                     return ;
-                size_type old_cap = _capacity;
+                }
+                size_type oldCapacity = _capacity;
                 if (_capacity == 0) {
                     _capacity = size;
                 }
                 while (_capacity < size) {
                     _capacity *= 2;
                 }
-
-                pointer begin, end;
-                begin = _allocator.allocate(_capacity);
-                end = begin;
-                for (size_type i = 0; i < _size; i++) {
-                    _allocator.construct(end, _begin[i]);
-                    _allocator.destroy(_begin + i);
-                    end++;
-                } // need to dealloc _begin?
-                _allocator.deallocate(_begin, old_cap);
+                pointer begin = _allocator.allocate(_capacity);
+                if (oldCapacity) {
+                    for (size_type i = 0; i < _size; ++i) {
+                        _allocator.construct(begin + i, _begin[i]);
+                        _allocator.destroy(_begin + i);
+                    }
+                    _allocator.deallocate(_begin, oldCapacity);
+                }
                 _begin = begin;
                 _end = begin + _size;
             }
