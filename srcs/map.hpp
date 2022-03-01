@@ -4,6 +4,8 @@
 #include "pair.hpp"
 #include "algorithm.hpp"
 #include "treap.hpp"
+#include <limits>
+#include <stdexcept>
 
 namespace ft {
 
@@ -78,9 +80,26 @@ namespace ft {
 
     /* Element access */
     public:
-        void at(const key_type& key) {
-            _treap.find(ft::make_pair(key, mapped_type()));
-            // iterator it = _treap.find(ft::make_pair(value.first, value.second));
+        mapped_type& at(const key_type& key) {
+            iterator it = _treap.find(ft::make_pair(key, mapped_type()));
+            if (it == end()) {
+                throw std::out_of_range("No such element");
+            } else {
+                return it->second;
+            }
+        }
+
+        const mapped_type& at(const key_type& key) const {
+            iterator it = _treap.find(ft::make_pair(key, mapped_type()));
+            if (it == end()) {
+                throw std::out_of_range("No such element");
+            } else {
+                return it->second;
+            }
+        }
+
+        mapped_type& operator[](const key_type& key) {
+            return (_treap.insert(ft::make_pair(key, mapped_type())).first)->second;
         }
 
     /* Iterators */
@@ -101,22 +120,128 @@ namespace ft {
             return _treap.end();
         }
 
+    /* Capacity*/
+    public:
+        size_type size() const {
+            return _treap.size();
+        }
 
+        bool empty() const {
+            return (_treap.size() == 0);
+        }
+
+        size_type max_size() const {
+            return std::numeric_limits<difference_type>::max();
+        }
 
     /* Modifiers */
     public:
-        void insert(const value_type& value) {
-            _treap.push(value);
+        void clear() {
+            _treap.clear();
         }
 
-    /* Element access */
+        ft::pair<iterator, bool> insert(const value_type& value) {
+            return _treap.insert(value);
+        }
+
+        ft::pair<iterator, bool> insert(iterator hint, const value_type& value) {
+            return _treap.insert(hint, value);
+        }
+
+        template< class InputIt >
+        void insert( InputIt first, InputIt last ) {
+            for (; first != last; ) {
+                insert(*first);
+                ++first;
+            }
+        }
+
+        void erase(iterator pos) {
+            _treap.erase(pos);
+        }
+
+        size_type erase(const key_type& key) {
+            iterator it = _treap.find(value_type(key, mapped_type()));
+            if (it == end()) {
+                return 0;
+            } else {
+                return _treap.erase(it);
+            }
+        }
+
+        void erase(iterator first, iterator last) {
+            for ( ; first != last; ) {
+                _treap.erase(first);
+                ++first;
+            }
+        }
+
+        void swap(map& other) {
+            ft::swap(_treap, other._treap);
+        }
+
+        void visualize() {
+            _treap.visualize();
+        }
+
+    /* Lookup */
     public:
-    /* Element access */
+        size_type count(const key_type& key) const {
+            if (_treap.find(value_type(key, mapped_type())) != end()) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        iterator find(const key_type& key) {
+            return _treap.find(value_type(key, mapped_type()));
+        }
+
+        const_iterator find(const key_type& key) const {
+            return _treap.find(value_type(key, mapped_type()));
+        }
+
+        ft::pair<iterator, iterator> equal_range(const key_type& key) {
+            value_type value = value_type(key, mapped_type());
+            return ft::make_pair(_treap.lower_bound(value), _treap.upper_bound(value));
+        }
+
+        ft::pair<const_iterator, const_iterator> equal_range(const key_type& key) const {
+            value_type value = value_type(key, mapped_type());
+            return ft::make_pair(_treap.lower_bound(value), _treap.upper_bound(value));
+        }
+
+        iterator lower_bound(const key_type& key) {
+            return _treap.lower_bound(value_type(key, mapped_type()));
+        }
+
+        const_iterator lower_bound(const key_type& key) const {
+            return _treap.lower_bound(value_type(key, mapped_type()));
+        }
+
+        iterator upper_bound(const key_type& key) {
+            return _treap.upper_bound(value_type(key, mapped_type()));
+        }
+
+        const_iterator upper_bound(const key_type& key) const {
+            return _treap.upper_bound(value_type(key, mapped_type()));
+        }
+
+    /* Observers */
     public:
-    /* Element access */
+        key_compare key_comp() {
+            return _cmp;
+        }
+
+        value_compare value_comp() {
+            return _treap.value_comp();
+        }
+
+    /* Compare operators */
     public:
-    /* Element access */
-    public:
+        friend bool operator==(const ft::map<Key, T, Compare, Alloc>& lhs,
+                                const ft::map<Key, T, Compare, Alloc>& rhs);
 
     private:
         allocator_type _allocator;
@@ -124,5 +249,13 @@ namespace ft {
         key_compare _cmp;
 
     };
+
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator==(const ft::map<Key,T,Compare,Alloc>& lhs,
+                    const ft::map<Key,T,Compare,Alloc>& rhs ) {
+        return true;
+    }
+
+
 
 }; //namespace ft

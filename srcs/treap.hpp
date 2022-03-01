@@ -268,7 +268,7 @@ namespace ft {
             return _size;
         }
 
-    /* Observers */
+    /* DELETE THIS! */
     public:
         void print(const node_pointer treap) const {
             if (treap) {
@@ -278,21 +278,17 @@ namespace ft {
             }
         }
 
-        iterator find(const value_type& value) {
-            node_pointer pnode = _search(_root, value);
-            if (pnode) {
-                return iterator(pnode);
-            } else {
-                return end();
+        void visualize(node_pointer treap = nullptr, size_t depth = 0) {
+            if (!treap && !depth) {
+                treap = _root;
             }
-        }
-
-        const_iterator find(const value_type& value) const {
-            node_pointer pnode = _search(_root, value);
-            if (pnode) {
-                return const_iterator(pnode);
-            } else {
-                return end();
+            if (treap) {
+                visualize(treap->left, depth + 1);
+                for (size_t i = 0; i < depth; ++i) {
+                    std::cout << ".";
+                }
+                std::cout << "\"" << treap->value << "\"" << std::endl;
+                visualize(treap->right, depth + 1);
             }
         }
 
@@ -328,25 +324,108 @@ namespace ft {
 
         size_type erase(iterator pos) {
             return _erase(pos.base());
-
         }
 
-        void visualize(node_pointer treap = nullptr, size_t depth = 0) {
-            if (!treap && !depth) {
-                treap = _root;
+    /* Lookup */
+    public:
+        iterator find(const value_type& value) {
+            node_pointer pnode = _search(_root, value);
+            if (pnode) {
+                return iterator(pnode);
+            } else {
+                return end();
             }
-            if (treap) {
-                visualize(treap->left, depth + 1);
-                for (size_t i = 0; i < depth; ++i) {
-                    std::cout << ".";
-                }
-                std::cout << "\"" << treap->value << "\"" << std::endl;
-                visualize(treap->right, depth + 1);
+        }
+
+        const_iterator find(const value_type& value) const {
+            node_pointer pnode = _search(_root, value);
+            if (pnode) {
+                return const_iterator(pnode);
+            } else {
+                return end();
             }
+        }
+
+        iterator lower_bound(const value_type& value) {
+            node_pointer less = nullptr;
+            _first_less_than(_root, value, less);
+            if (less) {
+                return iterator(less);
+            } else {
+                return end();
+            }
+        }
+
+        iterator upper_bound(const value_type& value) {
+            node_pointer greater = nullptr;
+            _first_greater_than(_root, value, greater);
+            if (greater) {
+                return iterator(greater);
+            } else {
+                return end();
+            }
+        }
+
+    /* Observers */
+    public:
+        compare_type value_comp() {
+            return _cmp;
         }
 
     /* private helpers */
     private:
+        void _first_less_than(node_pointer pnode, const value_type& than, node_pointer& less) const {
+            if (pnode) {
+                if (_cmp(than, pnode->value)) {
+                    _first_less_than(pnode->left, than, less);
+                } else if (_cmp(pnode->value, than)) {
+                    less = _max_node(less, pnode);
+                    _first_less_than(pnode->right, than, less);
+                } else {
+                    less = pnode;
+                }
+            }
+        }
+
+        void _first_greater_than(node_pointer pnode, const value_type& than, node_pointer& greater) const {
+            if (pnode) {
+                if (_cmp(than, pnode->value)) {
+                    greater = _min_node(greater, pnode);
+                    _first_greater_than(pnode->left, than, greater);
+                } else if (_cmp(pnode->value, than)) {
+                    _first_greater_than(pnode->right, than, greater);
+                } else {
+                    greater = pnode;
+                }
+            }
+        }
+
+        node_pointer _max_node(node_pointer lhs, node_pointer rhs) const {
+            if (!lhs) {
+                return rhs;
+            } else if (!rhs) {
+                return lhs;
+            }
+            if (_cmp(lhs->value, rhs->value)) {
+                return rhs;
+            } else {
+                return lhs;
+            }
+        }
+
+        node_pointer _min_node(node_pointer lhs, node_pointer rhs) const {
+            if (!lhs) {
+                return rhs;
+            } else if (!rhs) {
+                return lhs;
+            }
+            if (_cmp(lhs->value, rhs->value)) {
+                return lhs;
+            } else {
+                return rhs;
+            }
+        }
+
         size_t _erase(node_pointer pnode) {
             Path leadingPath = _get_leading_path(pnode);
             node_pointer parent = pnode->parent;
@@ -428,6 +507,7 @@ namespace ft {
             }
             return 1;
         }
+
         void _assign_paths(node_pointer from, node_pointer to, const bool withChilds = false) {
             to->parent = from->parent;
             to->left = from->left;
@@ -570,4 +650,5 @@ namespace ft {
         node_pointer _header;
         size_type _size;
     };
+
 } //namespace ft;
