@@ -238,10 +238,25 @@ namespace ft {
             return _treap.value_comp();
         }
 
-    /* Compare operators */
-    public:
-        friend bool operator==(const ft::map<Key, T, Compare, Alloc>& lhs,
-                                const ft::map<Key, T, Compare, Alloc>& rhs);
+    // /* Compare operators */
+    // public:
+    //     friend bool operator==(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
+
+    //     friend bool operator!=(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
+
+    //     friend bool operator<(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
+
+    //     friend bool operator<=(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
+
+    //     friend bool operator>(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
+
+    //     friend bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
+    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
 
     private:
         allocator_type _allocator;
@@ -251,11 +266,39 @@ namespace ft {
     };
 
     template< class Key, class T, class Compare, class Alloc >
-    bool operator==(const ft::map<Key,T,Compare,Alloc>& lhs,
-                    const ft::map<Key,T,Compare,Alloc>& rhs ) {
-        return true;
+    bool operator==(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return ft::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     }
 
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator!=(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return !(lhs == rhs);
+    }
 
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator<(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator<=(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return (lhs == rhs || lhs < rhs);
+    }
+
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator>(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return !(lhs <= rhs);
+    }
+
+    template< class Key, class T, class Compare, class Alloc >
+    bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
+                    const ft::map<Key, T, Compare, Alloc>& rhs ) {
+        return !(lhs < rhs);
+    }
 
 }; //namespace ft

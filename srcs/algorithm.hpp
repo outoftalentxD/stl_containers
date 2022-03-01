@@ -66,7 +66,7 @@ namespace ft {
         size_t size1 = ft::distance(first1, last1);
         size_t size2 = ft::distance(first2, last2);
         if (size1 == size2) {
-            for (; first1 != last1 && first2 != last2;) {
+            for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
                 if (*first1 != *first2)
                     return false;
             }
@@ -82,7 +82,7 @@ namespace ft {
         size_t size1 = last1 - first1;
         size_t size2 = last2 - first2;
         if (size1 == size2) {
-            for (; first1 != last1 && first2 != last2; ) {
+            for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
                 if (!p(*first1, *first2))
                     return false;
             }
