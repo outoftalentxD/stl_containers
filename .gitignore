@@ -6,6 +6,9 @@ dtest.sh
 main_test.cpp
 ducha.cpp
 
+#tester files
+srcs/tester/
+
 # VSCode configuration files
 .vscode/
 
