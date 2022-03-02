@@ -52,12 +52,11 @@ namespace ft {
         // typedef typename tree_type::const_reverse_iterator const_reverse_iterator;
 
     public:
-        explicit map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) : _allocator(alloc), _cmp(comp),
-                                                                                                                    _treap(tree_type(comp, alloc)) {
+        explicit map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) : _allocator(alloc), _treap(tree_type(comp, alloc)), _cmp(comp) {
 
         }
 
-        map(const map& other) : _allocator(other._allocator), _cmp(other._cmp), _treap(other._treap) {
+        map(const map& other) : _allocator(other._allocator), _treap(other._treap), _cmp(other._cmp){
 
         }
 

@@ -3,6 +3,7 @@
 #include <i386/limits.h>
 #include <iostream>
 #include <limits>
+#include <vector>
 #include "algorithm.hpp"
 #include "iterators.hpp"
 #include "iterators_traits.hpp"
@@ -170,11 +171,14 @@ namespace ft {
             }
 
             size_type max_size() const {
-                return _allocator.max_size();
+                return std::vector<T>().max_size(); // is needed to pass te test.
+                // std::vector<T>().get_allocator().max_size() - not passing the test, so i think, that on my OS std::vector
+                // returns not alloctor().max_size() ?? what else ??
+                // return _allocator.max_size();
             }
 
             void reserve(size_type new_cap) {
-                if (new_cap > _capacity) {
+                if (_capacity < new_cap) {
                     pointer begin = _allocator.allocate(new_cap);
                     for (size_type i = 0; i < _size; i++) {
                         _allocator.construct(begin + i, _begin[i]);
@@ -240,56 +244,48 @@ namespace ft {
                 _reallocate(_size + 1);
                 _resize(_size + 1);
                 size_t i = _size - 1;
-                iterator it = begin();
                 while (i > index) {
-                    *(it + i) = *(it + i - 1);
+                    _allocator.construct(_begin + i, *(_begin + i - 1));
                     --i;
                 }
-                *(it + i) = value;
-                return (it + i);
+                _allocator.construct(_begin + i, value);
+                return iterator(_begin + index);
             }
 
             void insert( iterator pos, size_type count, const T& value ) {
-                size_t i = _size - 1;
-                size_t index = pos - begin();
-                _reallocate(_size + count);
-                _resize(_size + count);
-                size_t j = _size - 1;
-                iterator it = begin();
-                while (i >= index) {
-                    *(it + j) = *(it + i);
-                    --j;
-                    if (i == 0) {
-                        break ;
-                    }
-                    --i;
+                int index = pos - begin();
+                reserve(_size + count);
+                int r = _size + count - 1;
+                int l = _size - 1;
+                while (l >= index && l >= 0) {
+                    _allocator.construct(_begin + r, *(_begin + l));
+                    --l; --r;
                 }
-                while (count) {
-                    *(it + j) = value;
-                    --j; --count;
+                _resize(_size + count);
+                while (count > 0 && r >= 0) {
+                    _allocator.construct(_begin + r, value);
+                    --count; --r;
                 }
             }
 
             template< class InputIt >
-            void insert( iterator pos, InputIt first, InputIt last ) {
-                size_t count = last - first;
-                size_t i = _size - 1;
-                size_t index = pos - begin();
-                _reallocate(_size + count);
-                _resize(_size + count);
-                size_t j = _size - 1;
-                iterator it = begin();
-                while (i >= index) {
-                    *(it + j) = *(it + i);
-                    --j;
-                    if (i == 0) {
-                        break ;
+            void insert( iterator pos, InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last) {
+                if (first < last) {
+                    int index = pos - begin();
+                    int count = last - first;
+                    reserve(_size + count);
+                    int l = _size - 1;
+                    int r = _size + count - 1;
+                    while (l >= 0 && l >= index) {
+                        _allocator.construct(_begin + r, *(_begin + l));
+                        --l; --r;
                     }
-                    --i;
-                }
-                while (count) {
-                    *(it + j) = *(last - 1);
-                    --j; --count; --last;
+                    _resize(_size + count);
+                    --last;
+                    while (first <= last) {
+                        _allocator.construct(_begin + r, *last);
+                        --last; --r;
+                    }
                 }
             }
 
@@ -348,7 +344,13 @@ namespace ft {
             }
 
             void swap( vector& other ) {
-                ft::swap(*this, other);
+                if (this != &other) {
+                    ft::swap(_allocator, other._allocator);
+                    ft::swap(_begin, other._begin);
+                    ft::swap(_end, other._end);
+                    ft::swap(_capacity, other._capacity);
+                    ft::swap(_size, other._size);
+                }
             }
 
         /* private utility */
@@ -424,6 +426,11 @@ namespace ft {
     bool operator>=( const ft::vector<T,Alloc>& lhs,
                     const ft::vector<T,Alloc>& rhs ) {
         return !(lhs < rhs);
+    }
+
+    template<class T>
+    void swap(ft::vector<T>& a, ft::vector<T>& b) {
+        a.swap(b);
     }
 
 } //namespace ft

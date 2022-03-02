@@ -214,13 +214,13 @@ namespace ft {
         typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
     public:
-        Treap(const compare_type& cmp, const allocator_type& allocator = Alloc()) : _cmp(cmp), _allocator(allocator), _node_allocator(node_allocator()), _size(0) {
+        Treap(const compare_type& cmp, const allocator_type& allocator = Alloc()) : _allocator(allocator), _node_allocator(node_allocator()), _cmp(cmp), _size(0) {
             _header = _node_allocator.allocate(1);
             _node_allocator.construct(_header, value_type());
             _root = _header;
         }
 
-        Treap(const Treap& other) : _cmp(other._cmp), _allocator(other._allocator), _node_allocator(other._node_allocator), _root(other._root), _header(other._header), _size(other._size) {
+        Treap(const Treap& other) : _allocator(other._allocator), _node_allocator(other._node_allocator), _cmp(other._cmp), _root(other._root), _header(other._header), _size(other._size) {
 
         }
 
