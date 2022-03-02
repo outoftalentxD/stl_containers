@@ -1,6 +1,8 @@
 #pragma once
 
+#include <i386/limits.h>
 #include <iostream>
+#include <limits>
 #include "algorithm.hpp"
 #include "iterators.hpp"
 #include "iterators_traits.hpp"
@@ -28,12 +30,12 @@ namespace ft {
             typedef typename Allocator::size_type size_type;
 
         public:
-            explicit vector(const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0), _allocator(allocator), _begin(), _end() {
+            explicit vector(const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0), _allocator(allocator), _begin(), _end(){
 
             }
 
             explicit vector(size_type size, const_reference value = value_type(), const allocator_type& allocator = allocator_type())
-                    : _allocator(allocator), _size(size), _begin(), _end(), _capacity(0){
+                    : _size(size), _capacity(0), _allocator(allocator) , _begin(), _end() {
                 if (size > 0) {
                     _reallocate(size);
                     for (size_type i = 0; i < size; ++i) {
@@ -52,7 +54,8 @@ namespace ft {
             }
 
             template<class InputIt>
-            vector(InputIt first, InputIt last, const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0), _allocator(allocator), _begin(), _end() {
+            vector(InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last,
+                    const allocator_type& allocator = allocator_type()) : _size(0), _capacity(0),  _allocator(allocator), _begin(), _end() {
                 size_t count = last - first;
                 _reallocate(count);
                 _resize(count);
@@ -96,7 +99,7 @@ namespace ft {
 
             template< class InputIt >
             void assign( InputIt first, typename ft::enable_if<!ft::is_integral<InputIt>::value, InputIt>::type last) {
-                difference_type count = last - first;
+                size_type count = last - first;
                 _reallocate(count);
                 _resize(count);
                 for (iterator it = begin(); first != last; ++first, ++it) {
@@ -167,7 +170,7 @@ namespace ft {
             }
 
             size_type max_size() const {
-                return allocator_type().max_size();
+                return _allocator.max_size();
             }
 
             void reserve(size_type new_cap) {
@@ -207,19 +210,19 @@ namespace ft {
             }
 
             reverse_iterator rbegin() {
-                return end();
+                return --end();
             }
 
             reverse_iterator rend() {
-                return begin();
+                return --begin();
             }
 
             const_reverse_iterator rbegin() const {
-                return end();
+                return --end();
             }
 
             const_reverse_iterator rend() const {
-                return begin();
+                return --begin();
             }
 
         /* Modifiers */
@@ -319,7 +322,8 @@ namespace ft {
             }
 
             void push_back( const T& value ) {
-                _reallocate(++_size);
+                _reallocate(_size + 1);
+                _resize(_size + 1);
                 back() = value;
             }
 
@@ -331,7 +335,7 @@ namespace ft {
 
             void resize( size_type count, T value = T() ) {
                 if (count < _size) {
-                    _size = count;
+                    _resize(count);
                 } else {
                     _reallocate(count);
                     iterator it = begin() + _size;
@@ -380,10 +384,9 @@ namespace ft {
         private:
             size_type _size;
             size_type _capacity;
+            allocator_type _allocator;
             pointer   _begin;
             pointer   _end;
-            allocator_type _allocator;
-
     };
 
     template< class T, class Alloc >

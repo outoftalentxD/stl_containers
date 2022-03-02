@@ -88,7 +88,7 @@ namespace ft {
                 return *this;
             }
 
-            OwnIterator operator-(int n) const {
+            OwnIterator operator-(int n) {
                 OwnIterator ret(*this);
 
                 ret._ptr -= n;
@@ -107,9 +107,12 @@ namespace ft {
                 return _ptr;
             }
 
-            // operator OwnIterator<T, const T*, const T&>() {
-            //     return OwnIterator<T, const T*, const T&>(_ptr);
-            // }
+            reference operator[](difference_type n) {
+                OwnIterator ret(*this);
+
+                ret += n;
+                return *ret;
+            }
 
             bool operator==(const OwnIterator& rhs) const {
                 return _ptr == rhs._ptr;
@@ -190,7 +193,11 @@ namespace ft {
             }
 
             reference operator[](difference_type n) {
-                return _iter[-n - 1];
+                return _iter[-n];
+            }
+
+            const reference operator[](difference_type n) const {
+                return _iter[-n];
             }
 
             reverse_iterator& operator++() {
@@ -253,22 +260,22 @@ namespace ft {
 
             template<class T>
             bool operator>=(const reverse_iterator<T>& rhs) const {
-                return (_iter >= rhs._iter);
-            }
-
-            template<class T>
-            bool operator<=(const reverse_iterator<T>& rhs) const {
                 return (_iter <= rhs._iter);
             }
 
             template<class T>
+            bool operator<=(const reverse_iterator<T>& rhs) const {
+                return (_iter >= rhs._iter);
+            }
+
+            template<class T>
             bool operator>(const reverse_iterator<T>& rhs) const {
-                return (_iter > rhs._iter);
+                return (_iter < rhs._iter);
             }
 
             template<class T>
             bool operator<(const reverse_iterator<T>& rhs) const {
-                return (_iter < rhs._iter);
+                return (_iter > rhs._iter);
             }
 
         private:
