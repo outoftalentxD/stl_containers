@@ -181,25 +181,25 @@ namespace ft {
         public:
 
             iterator_type base() const {
-                iterator_type temp = _iter;
-                ++temp;
-                return temp;
+                return _iter;
             }
 
             reference operator*() const {
-                return *_iter;
+                iterator_type temp = _iter;
+                return *--temp;
             }
 
             pointer operator->() const {
-                return &(*_iter);
+                iterator_type temp = _iter;
+                return &(*--temp);
             }
 
             reference operator[](difference_type n) {
-                return _iter[-n];
+                return _iter[-n - 1];
             }
 
             const reference operator[](difference_type n) const {
-                return _iter[-n];
+                return _iter[-n - 1];
             }
 
             reverse_iterator& operator++() {

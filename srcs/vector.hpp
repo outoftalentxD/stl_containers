@@ -214,19 +214,19 @@ namespace ft {
             }
 
             reverse_iterator rbegin() {
-                return --end();
+                return reverse_iterator(end());
             }
 
             reverse_iterator rend() {
-                return --begin();
+                return reverse_iterator(begin());
             }
 
             const_reverse_iterator rbegin() const {
-                return --end();
+                return const_reverse_iterator(end());
             }
 
             const_reverse_iterator rend() const {
-                return --begin();
+                return const_reverse_iterator(begin());
             }
 
         /* Modifiers */
