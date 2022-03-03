@@ -9,7 +9,7 @@
 
 namespace ft {
 
-    template<class Key, class T, class Compare = ft::less<Key>, class Alloc = std::allocator<pair<const Key, T> > >
+    template<class Key, class T, class Compare = std::less<Key>, class Alloc = std::allocator<pair<const Key, T> > >
     class map {
     public:
         typedef Key key_type;
@@ -48,12 +48,19 @@ namespace ft {
     public:
         typedef typename tree_type::iterator iterator;
         typedef typename tree_type::const_iterator const_iterator;
-        // typedef typename tree_type::reverse_terator reverse_iterator;
-        // typedef typename tree_type::const_reverse_iterator const_reverse_iterator;
+        typedef typename tree_type::reverse_iterator reverse_iterator;
+        typedef typename tree_type::const_reverse_iterator const_reverse_iterator;
 
     public:
         explicit map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) : _allocator(alloc), _treap(tree_type(comp, alloc)), _cmp(comp) {
 
+        }
+
+        template< class InputIt >
+        map( InputIt first, InputIt last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type() ) : _allocator(alloc), _treap(tree_type(comp, alloc)), _cmp(comp) {
+            for (; first != last; ++first) {
+                _treap.insert(*first);
+            }
         }
 
         map(const map& other) : _allocator(other._allocator), _treap(other._treap), _cmp(other._cmp){
@@ -119,6 +126,22 @@ namespace ft {
             return _treap.end();
         }
 
+        reverse_iterator rbegin() {
+            return _treap.rbegin();
+        }
+
+        const_reverse_iterator rbegin() const {
+            return _treap.rbegin();
+        }
+
+        reverse_iterator rend() {
+            return _treap.rend();
+        }
+
+        const_reverse_iterator rend() const {
+            return _treap.rend();
+        }
+
     /* Capacity*/
     public:
         size_type size() const {
@@ -143,7 +166,7 @@ namespace ft {
             return _treap.insert(value);
         }
 
-        ft::pair<iterator, bool> insert(iterator hint, const value_type& value) {
+        iterator insert(iterator hint, const value_type& value) {
             return _treap.insert(hint, value);
         }
 

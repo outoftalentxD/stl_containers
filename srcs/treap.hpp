@@ -50,7 +50,7 @@ namespace ft {
 
     /* Treap iterator */
     template<typename T>
-    class TreapIter {
+    class TreapIter : iterator<T, ft::bidirectional_iterator_tag>{
     public:
         typedef ft::bidirectional_iterator_tag iterator_category;
         typedef typename ft::iterator_traits<T*>::value_type 		value_type;
@@ -80,7 +80,6 @@ namespace ft {
         }
 
     public:
-
         node_pointer base() const {
             return _pnode;
         }
@@ -110,7 +109,7 @@ namespace ft {
         }
 
         TreapIter operator++(int) {
-            TreapIter<value_type> temp = *this;
+            TreapIter<T> temp(*this);
 
             if (_pnode->right) {
                 _pnode = _treap_subtree_min(_pnode->right);
@@ -144,7 +143,7 @@ namespace ft {
         }
 
         TreapIter operator--(int) {
-            TreapIter<value_type> temp = *this;
+            TreapIter<T> temp(*this);
             if (_pnode->left) {
                 _pnode = _treap_subtree_max(_pnode->left);
             } else {
@@ -192,7 +191,7 @@ namespace ft {
     }
 
     /* Treap */
-    template<class Value, class Compare = ft::less<Value>, class Alloc = std::allocator<Value> >
+    template<class Value, class Compare = std::less<Value>, class Alloc = std::allocator<Value> >
     class Treap {
     public:
         typedef Value value_type;
@@ -214,24 +213,31 @@ namespace ft {
         typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
     public:
-        Treap(const compare_type& cmp, const allocator_type& allocator = Alloc()) : _allocator(allocator), _node_allocator(node_allocator()), _cmp(cmp), _size(0) {
+        Treap(const compare_type& cmp, const allocator_type& allocator = allocator_type()) : _allocator(allocator), _node_allocator(node_allocator()), _cmp(cmp), _size(0) {
             _header = _node_allocator.allocate(1);
             _node_allocator.construct(_header, value_type());
             _root = _header;
         }
 
-        Treap(const Treap& other) : _allocator(other._allocator), _node_allocator(other._node_allocator), _cmp(other._cmp), _root(other._root), _header(other._header), _size(other._size) {
-
+        Treap(const Treap& other) : _allocator(other._allocator), _node_allocator(other._node_allocator), _cmp(other._cmp), _size(0) {
+            if (this != &other) {
+                _header = _node_allocator.allocate(1);
+                _node_allocator.construct(_header, value_type());
+                _root = _header;
+                _insert_all_nodes(_root, other._root);
+            }
         }
 
         Treap& operator=(const Treap& other) {
             if (this != &other) {
-                _header = other._header;
-                _root = other._root;
                 _allocator = other._allocator;
                 _cmp = other._cmp;
                 _node_allocator = other._node_allocator;
-                _size = other._size;
+                _size = 0;
+                _header = _node_allocator.allocate(1);
+                _node_allocator.construct(_header, value_type());
+                _root = _header;
+                _insert_all_nodes(_root, other._root);
             }
             return *this;
         }
@@ -260,6 +266,22 @@ namespace ft {
 
         const_iterator end() const {
             return const_iterator(_header);
+        }
+
+        reverse_iterator rbegin() {
+            return reverse_iterator(begin());
+        }
+
+        const_reverse_iterator rbegin() const {
+            return const_reverse_iterator(begin());
+        }
+
+        reverse_iterator rend() {
+            return reverse_iterator(end());
+        }
+
+        const_reverse_iterator rend() const {
+            return const_reverse_iterator(end());
         }
 
     /* Capacity */
@@ -311,14 +333,14 @@ namespace ft {
             }
         }
 
-        ft::pair<iterator, bool> insert(iterator hint, const value_type& value) {
+        iterator insert(iterator hint, const value_type& value) {
             node_pointer proot = hint.base();
             node_pointer pnode = _search(_root, value);
             if (pnode) {
-                return ft::make_pair(iterator(pnode), false);
+                return iterator(pnode);
             } else {
                 _insert(proot, _create_node(value));
-                return ft::make_pair(iterator(_search(_root, value), true));
+                return iterator(_search(proot, value));
             }
         }
 
@@ -356,11 +378,31 @@ namespace ft {
             }
         }
 
+        const_iterator lower_bound(const value_type& value) const {
+            node_pointer less = nullptr;
+            _first_less_than(_root, value, less);
+            if (less) {
+                return const_iterator(less);
+            } else {
+                return end();
+            }
+        }
+
         iterator upper_bound(const value_type& value) {
             node_pointer greater = nullptr;
             _first_greater_than(_root, value, greater);
             if (greater) {
                 return iterator(greater);
+            } else {
+                return end();
+            }
+        }
+
+        const_iterator upper_bound(const value_type& value) const {
+            node_pointer greater = nullptr;
+            _first_greater_than(_root, value, greater);
+            if (greater) {
+                return const_iterator(greater);
             } else {
                 return end();
             }
@@ -374,6 +416,14 @@ namespace ft {
 
     /* private helpers */
     private:
+        void _insert_all_nodes(node_pointer to, node_pointer from) {
+            if (from) {
+                _insert(to, _create_node(from->value));
+                _insert_all_nodes(to, from->left);
+                _insert_all_nodes(to, from->right);
+            }
+        }
+
         void _first_less_than(node_pointer pnode, const value_type& than, node_pointer& less) const {
             if (pnode) {
                 if (_cmp(than, pnode->value)) {
