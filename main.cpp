@@ -6,7 +6,7 @@
 	#include <map>
 	#include <stack>
 	#include <vector>
-	// namespace ft = std;
+	namespace ft = std;
 #else
 
 #include "srcs/vector.hpp"
