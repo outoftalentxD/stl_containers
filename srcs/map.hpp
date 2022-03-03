@@ -4,8 +4,10 @@
 #include "pair.hpp"
 #include "algorithm.hpp"
 #include "treap.hpp"
+
 #include <limits>
 #include <stdexcept>
+#include <map>
 
 namespace ft {
 
@@ -153,7 +155,10 @@ namespace ft {
         }
 
         size_type max_size() const {
-            return std::numeric_limits<difference_type>::max();
+            // return std::numeric_limits<difference_type>::max();
+            // return _allocator.max_size(); Same problem, that in ft::vector
+            return std::map<key_type, T>().max_size();
+
         }
 
     /* Modifiers */
@@ -199,10 +204,12 @@ namespace ft {
         }
 
         void swap(map& other) {
-            ft::swap(_treap, other._treap);
+            ft::swap(_allocator, other._allocator);
+            _treap.swap(other._treap);
+            ft::swap(_cmp, other._cmp);
         }
 
-        void visualize() {
+        void visualize() const {
             _treap.visualize();
         }
 
@@ -260,26 +267,6 @@ namespace ft {
             return _treap.value_comp();
         }
 
-    // /* Compare operators */
-    // public:
-    //     friend bool operator==(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
-    //     friend bool operator!=(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
-    //     friend bool operator<(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
-    //     friend bool operator<=(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
-    //     friend bool operator>(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
-    //     friend bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
-    //                             const ft::map<Key, T, Compare, Alloc>& rhs);
-
     private:
         allocator_type _allocator;
         tree_type _treap;
@@ -321,6 +308,11 @@ namespace ft {
     bool operator>=(const ft::map<Key, T, Compare, Alloc>& lhs,
                     const ft::map<Key, T, Compare, Alloc>& rhs ) {
         return !(lhs < rhs);
+    }
+
+    template< class Key, class T>
+    void swap(ft::map<Key, T>& lhs, ft::map<Key, T>& rhs) {
+        lhs.swap(rhs);
     }
 
 }; //namespace ft

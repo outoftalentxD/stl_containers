@@ -181,7 +181,9 @@ namespace ft {
         public:
 
             iterator_type base() const {
-                return _iter;
+                iterator_type temp = _iter;
+                ++temp;
+                return temp;
             }
 
             reference operator*() const {

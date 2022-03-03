@@ -231,13 +231,15 @@ namespace ft {
         Treap& operator=(const Treap& other) {
             if (this != &other) {
                 _allocator = other._allocator;
-                _cmp = other._cmp;
                 _node_allocator = other._node_allocator;
+                _cmp = other._cmp;
                 _size = 0;
                 _header = _node_allocator.allocate(1);
                 _node_allocator.construct(_header, value_type());
                 _root = _header;
-                _insert_all_nodes(_root, other._root);
+                if (other._size > 0) {
+                    _insert_all_nodes(_root, other._root);
+                }
             }
             return *this;
         }
@@ -269,11 +271,11 @@ namespace ft {
         }
 
         reverse_iterator rbegin() {
-            return reverse_iterator(begin());
+            return reverse_iterator(--end());
         }
 
         const_reverse_iterator rbegin() const {
-            return const_reverse_iterator(begin());
+            return const_reverse_iterator(--end());
         }
 
         reverse_iterator rend() {
@@ -300,7 +302,7 @@ namespace ft {
             }
         }
 
-        void visualize(node_pointer treap = nullptr, size_t depth = 0) {
+        void visualize(node_pointer treap = nullptr, size_t depth = 0) const {
             if (!treap && !depth) {
                 treap = _root;
             }
@@ -317,14 +319,19 @@ namespace ft {
     /* Modifiers */
     public:
         void clear() {
-            _delete_treap(_root);
-            _size = 0;
-            _root = _header;
-            _header->left = _header->right = nullptr;
+            if (_root != _header) {
+                _delete_treap(_root);
+                _size = 0;
+                _root = _header;
+                _header->left = _header->right = nullptr;
+            }
         }
 
         ft::pair<iterator, bool> insert(const value_type& value) {
-            node_pointer pnode = _search(_root, value);
+            node_pointer pnode = nullptr;
+            if (_root != _header) {
+                pnode = _search(_root, value);
+            }
             if (pnode) {
                 return ft::make_pair(iterator(pnode), false);
             } else {
@@ -334,18 +341,22 @@ namespace ft {
         }
 
         iterator insert(iterator hint, const value_type& value) {
-            node_pointer proot = hint.base();
-            node_pointer pnode = _search(_root, value);
-            if (pnode) {
-                return iterator(pnode);
-            } else {
-                _insert(proot, _create_node(value));
-                return iterator(_search(proot, value));
-            }
+            (void)hint;
+            return insert(value).first;
         }
 
         size_type erase(iterator pos) {
+            --_size;
             return _erase(pos.base());
+        }
+
+        void swap(Treap& other) {
+            ft::swap(_allocator, other._allocator);
+            ft::swap(_node_allocator, other._node_allocator);
+            ft::swap(_cmp, other._cmp);
+            ft::swap(_root, other._root);
+            ft::swap(_header, other._header);
+            ft::swap(_size, other._size);
         }
 
     /* Lookup */
@@ -370,21 +381,27 @@ namespace ft {
 
         iterator lower_bound(const value_type& value) {
             node_pointer less = nullptr;
+            if (_cmp(*--end(), value)) {
+                return end();
+            }
             _first_less_than(_root, value, less);
             if (less) {
                 return iterator(less);
             } else {
-                return end();
+                return begin();
             }
         }
 
         const_iterator lower_bound(const value_type& value) const {
             node_pointer less = nullptr;
+            if (_cmp(*--end(), value)) {
+                return end();
+            }
             _first_less_than(_root, value, less);
             if (less) {
                 return const_iterator(less);
             } else {
-                return end();
+                return begin();
             }
         }
 
@@ -442,10 +459,8 @@ namespace ft {
                 if (_cmp(than, pnode->value)) {
                     greater = _min_node(greater, pnode);
                     _first_greater_than(pnode->left, than, greater);
-                } else if (_cmp(pnode->value, than)) {
-                    _first_greater_than(pnode->right, than, greater);
                 } else {
-                    greater = pnode;
+                    _first_greater_than(pnode->right, than, greater);
                 }
             }
         }
@@ -485,7 +500,6 @@ namespace ft {
             } else {
                 _erase_node(leadingPath, pnode, parent);
             }
-            _size--;
             return 1;
         }
 
