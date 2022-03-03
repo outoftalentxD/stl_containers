@@ -1,7 +1,6 @@
 # files for test
 app
 app.sh
-test.sh
 dtest.sh
 main_test.cpp
 ducha.cpp
