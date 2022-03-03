@@ -82,7 +82,7 @@ namespace ft {
             template<class _value_type, class _container_type>
             friend bool operator>=(const ft::stack<_value_type, _container_type>&, const ft::stack<_value_type, _container_type>&);
 
-        private:
+        protected:
             container_type c;
 
     };
@@ -116,5 +116,5 @@ namespace ft {
     inline bool operator<=(const ft::stack<_value, _container_type>& _x, const ft::stack<_value, _container_type>& _y) {
         return !(_y < _x);
     }
-    
+
 }; //namespace ft
