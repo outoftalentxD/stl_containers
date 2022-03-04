@@ -292,30 +292,6 @@ namespace ft {
             return _size;
         }
 
-    /* DELETE THIS! */
-    public:
-        void print(const node_pointer treap) const {
-            if (treap) {
-                print(treap->left);
-                std::cout << treap->value.first << std::endl;
-                print(treap->right);
-            }
-        }
-
-        void visualize(node_pointer treap = nullptr, size_t depth = 0) const {
-            if (!treap && !depth) {
-                treap = _root;
-            }
-            if (treap) {
-                visualize(treap->left, depth + 1);
-                for (size_t i = 0; i < depth; ++i) {
-                    std::cout << ".";
-                }
-                std::cout << "\"" << treap->value << "\"" << std::endl;
-                visualize(treap->right, depth + 1);
-            }
-        }
-
     /* Modifiers */
     public:
         void clear() {

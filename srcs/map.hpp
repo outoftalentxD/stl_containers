@@ -209,10 +209,6 @@ namespace ft {
             ft::swap(_cmp, other._cmp);
         }
 
-        void visualize() const {
-            _treap.visualize();
-        }
-
     /* Lookup */
     public:
         size_type count(const key_type& key) const {
