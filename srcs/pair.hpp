@@ -47,7 +47,6 @@ namespace ft {
         return (lhs.first == rhs.first && lhs.second == rhs.second);
     }
 
-
     template<class F, class S>
     bool operator!=(const pair<F, S>& lhs, const pair<F, S>& rhs) {
         return (lhs.first != rhs.first || lhs.second != rhs.second);

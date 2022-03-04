@@ -17,7 +17,6 @@ namespace ft {
     template<class T, class Pointer = T*, class Reference = T&, class Distance = std::ptrdiff_t>
     class OwnIterator : public iterator<T, random_access_iterator_tag, Pointer, Reference, Distance> {
         public:
-            // typedef iterator<T, random_access_iterator_tag> iter;
             typedef Pointer pointer;
             typedef Reference reference;
             typedef Distance difference_type;
@@ -137,8 +136,6 @@ namespace ft {
             bool operator<(const OwnIterator& rhs) const {
                 return _ptr < rhs._ptr;
             }
-
-        protected:
 
         private:
             pointer _ptr;
