@@ -3,11 +3,11 @@
 #include "../vector.hpp"
 #include "../pair.hpp"
 
-using namespace std;
+using namespace ft;
 
 int main() {
     vector<int> vec0;
-    size_t testSize = 4000;
+    size_t testSize = 10000;
 
     for (size_t i = 0; i < testSize; ++i) {
         srand(i);

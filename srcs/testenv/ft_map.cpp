@@ -7,7 +7,7 @@ using namespace ft;
 
 int main() {
     map<int, int> data1;
-    size_t testSize = 4000;
+    size_t testSize = 10000;
 
     for (size_t i = 0; i < testSize; ++i) {
         srand(i);
