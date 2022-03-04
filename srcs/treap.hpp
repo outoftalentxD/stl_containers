@@ -219,7 +219,6 @@ namespace ft {
             _header = _node_allocator.allocate(1);
             _node_allocator.construct(_header, value_type());
             _root = _header;
-            // _root = nullptr;
         }
 
         Treap(const Treap& other) : _allocator(other._allocator), _node_allocator(other._node_allocator), _cmp(other._cmp), _size(0) {
@@ -237,9 +236,11 @@ namespace ft {
                 _node_allocator = other._node_allocator;
                 _cmp = other._cmp;
                 _size = 0;
-                _header = _node_allocator.allocate(1);
-                _node_allocator.construct(_header, value_type());
+                if (_root != _header) {
+                    _delete_treap(_root);
+                }
                 _root = _header;
+                _header->left = _header->right = nullptr;
                 if (other._size > 0) {
                     _insert_all_nodes(_root, other._root);
                 }
@@ -287,113 +288,6 @@ namespace ft {
 
         const_reverse_iterator rend() const {
             return const_reverse_iterator(begin());
-        }
-
-    /* TO REMOVE */
-    size_t depth(node_pointer treap = nullptr, size_t depth = 0) {
-        if (depth == 0) {
-            treap = _root;
-        }
-        if (!treap) {
-            return 0;
-        }
-        return std::max(this->depth(treap->left, depth + 1), this->depth(treap->right, depth + 1)) + 1;
-    }
-
-    void visualize(node_pointer _treap = nullptr, size_t depth = 0) {
-        if (depth == 0) {
-            _treap = _root;
-        }
-        if (_treap) {
-            visualize(_treap->right, depth + 1);
-            for (size_t i = 0; i < depth; ++i) {
-                std::cout << "\t";
-            }
-            std::cout << _treap->value.first << '\n';
-            visualize(_treap->left, depth + 1);
-        }
-    }
-
-    void test() {
-        node_pointer temp = _root;
-        std::cout << "root->parent: " << _root->parent << " " << _header << std::endl;
-        std::cout << "root: " << _root->value.first << " addr: " << _root << std::endl;
-        while (temp->right) {
-            temp = temp->right;
-            std::cout << "down-> " << temp->value.first << std::endl;
-        }
-        std::cout << "root: " << _root << std::endl;
-        std::cout << "parent: " << temp->parent << std::endl;
-        while (temp->parent != _header) {
-            std::cout << "up-> " << temp->value.first << '\n';
-            temp = temp->parent;
-        }
-        std::cout << "end: " << temp->value.first << std::endl;
-    }
-
-    /* AVL TREE */
-    private:
-        size_type _height(node_pointer pnode) {
-            if (pnode) {
-                return pnode->height;
-            } else {
-                return 0;
-            }
-        }
-
-        int _bfactor(node_pointer pnode) {
-            return _height(pnode->right) - _height(pnode->left);
-        }
-
-        void _fix_height(node_pointer pnode) {
-            size_t hl = _height(pnode->left);
-            size_t hr = _height(pnode->right);
-            pnode->height = (hl > hr ? hl : hr) + 1;
-        }
-
-        node_pointer _rotate_right(node_pointer p) { //need to assign parents
-            node_pointer q = p->left;
-            q->parent = p->parent;
-            p->left = q->right;
-            if (q->right) {
-                q->right->parent = p;
-            }
-            q->right = p;
-            p->parent = q;
-            _fix_height(p);
-            _fix_height(q);
-            return q;
-        }
-
-        node_pointer _rotate_left(node_pointer q) {
-            node_pointer p = q->right;
-            p->parent = q->parent;
-            q->right = p->left;
-            if (p->left) {
-                p->left->parent = q;
-            }
-            p->left = q;
-            q->parent = p;
-            _fix_height(q);
-            _fix_height(p);
-            return p;
-        }
-
-        node_pointer _balance(node_pointer pnode) {
-            _fix_height(pnode);
-            if (_bfactor(pnode) == 2) {
-                if (_bfactor(pnode->right) < 0) {
-                    pnode->right = _rotate_right(pnode->right);
-                }
-                return _rotate_left(pnode);
-            }
-            if (_bfactor(pnode) == -2 ) {
-                if (_bfactor(pnode->left) > 0) {
-                    pnode->left = _rotate_left(pnode->left);
-                }
-                return _rotate_right(pnode);
-            }
-            return pnode;
         }
 
     /* Capacity */
@@ -525,6 +419,69 @@ namespace ft {
 
     /* private helpers */
     private:
+        size_type _height(node_pointer pnode) {
+            if (pnode) {
+                return pnode->height;
+            } else {
+                return 0;
+            }
+        }
+
+        int _bfactor(node_pointer pnode) {
+            return _height(pnode->right) - _height(pnode->left);
+        }
+
+        void _fix_height(node_pointer pnode) {
+            size_t hl = _height(pnode->left);
+            size_t hr = _height(pnode->right);
+            pnode->height = (hl > hr ? hl : hr) + 1;
+        }
+
+        node_pointer _rotate_right(node_pointer p) { //need to assign parents
+            node_pointer q = p->left;
+            q->parent = p->parent;
+            p->left = q->right;
+            if (q->right) {
+                q->right->parent = p;
+            }
+            q->right = p;
+            p->parent = q;
+            _fix_height(p);
+            _fix_height(q);
+            return q;
+        }
+
+        node_pointer _rotate_left(node_pointer q) {
+            node_pointer p = q->right;
+            p->parent = q->parent;
+            q->right = p->left;
+            if (p->left) {
+                p->left->parent = q;
+            }
+            p->left = q;
+            q->parent = p;
+            _fix_height(q);
+            _fix_height(p);
+            return p;
+        }
+
+        node_pointer _balance(node_pointer pnode) {
+            _fix_height(pnode);
+            if (_bfactor(pnode) == 2) {
+                if (_bfactor(pnode->right) < 0) {
+                    pnode->right = _rotate_right(pnode->right);
+                }
+                return _rotate_left(pnode);
+            }
+            if (_bfactor(pnode) == -2 ) {
+                if (_bfactor(pnode->left) > 0) {
+                    pnode->left = _rotate_left(pnode->left);
+                }
+                return _rotate_right(pnode);
+            }
+            return pnode;
+        }
+
         node_pointer __erase(node_pointer pnode, const value_type& value) // удаление ключа k из дерева p
         {
             if(!pnode) {
@@ -570,7 +527,9 @@ namespace ft {
                 return p->right;
             }
             p->left = __erase_subtree_min(p->left);
-            p->left->parent = p;
+            if (p->left) {
+                p->left->parent = p;
+            }
             return _balance(p);
         }
 
@@ -611,7 +570,7 @@ namespace ft {
 
         void _insert_all_nodes(node_pointer to, node_pointer from) {
             if (from) {
-                _insert(to, _create_node(from->value));
+                _insert_avl(from->value);
                 _insert_all_nodes(to, from->left);
                 _insert_all_nodes(to, from->right);
             }
@@ -667,155 +626,6 @@ namespace ft {
             }
         }
 
-        size_t _erase(node_pointer pnode) {
-            Path leadingPath = _get_leading_path(pnode);
-            node_pointer parent = pnode->parent;
-
-            if (parent == _header) {
-                _erase_root_node(leadingPath, pnode);
-            } else {
-                _erase_node(leadingPath, pnode, parent);
-            }
-            return 1;
-        }
-
-        size_type _erase_root_node(Path leadingPath, node_pointer pnode) {
-            switch (leadingPath) {
-                case none: {
-                    _header->left = _header->right = nullptr;
-                    _root = _header;
-                    _delete_node(pnode);
-                    break;
-                }
-                case left: {
-                    _header->left = _header->right = pnode->left;
-                    pnode->left->parent = _header;
-                    _root = pnode->left;
-                    _delete_node(pnode);
-                    break;
-                }
-                case right: {
-                    _header->left = _header->right = pnode->right;
-                    pnode->right->parent = _header;
-                    _root = pnode->right;
-                    _delete_node(pnode);
-                    break;
-                }
-                case both: {
-                    node_pointer rightSubtreeMinPnode = _subtree_min(pnode->right);
-                    node_pointer newNode = _create_node(rightSubtreeMinPnode->value);
-                    _header->left = _header->right = newNode;
-                    _root = newNode;
-                    _assign_paths(pnode, newNode, true);
-                    _erase(rightSubtreeMinPnode);
-                    _delete_node(pnode);
-                    break;
-                }
-            }
-            return 1;
-        }
-
-        size_type _erase_node(Path leadingPath, node_pointer pnode, node_pointer parent) {
-            Path parentPath = _get_parent_path(pnode);
-            switch (leadingPath) {
-                case none: {
-                    _assign_leading_path(parent, parentPath);
-                    _delete_node(pnode);
-                    break;
-                }
-                case left: {
-                    pnode->left->parent = pnode->parent;
-                    _assign_leading_path(parent, parentPath, pnode->left);
-                    _delete_node(pnode);
-                    break;
-                }
-                case right: {
-                    pnode->right->parent = pnode->parent;
-                    _assign_leading_path(parent, parentPath, pnode->right);
-                    _delete_node(pnode);
-                    break;
-                }
-                case both: {
-                    node_pointer rightSubtreeMinPnode = _subtree_min(pnode->right);
-                    node_pointer newNode = _create_node(rightSubtreeMinPnode->value);
-                    _assign_paths(pnode, newNode, true);
-                    _assign_leading_path(parent, parentPath, newNode);
-                    _erase(rightSubtreeMinPnode);
-                    _delete_node(pnode);
-                    break;
-                }
-            }
-            return 1;
-        }
-
-        void _assign_paths(node_pointer from, node_pointer to, const bool withChilds = false) {
-            to->parent = from->parent;
-            to->left = from->left;
-            to->right = from->right;
-            if (withChilds) {
-                if (from->left) {
-                    from->left->parent = to;
-                }
-                if (from->right) {
-                    from->right->parent = to;
-                }
-            }
-        }
-
-        void _assign_leading_path(node_pointer pnode, Path leadingPath, node_pointer value = nullptr) {
-            if (pnode) {
-                switch (leadingPath) {
-                    case left: {
-                        pnode->left = value;
-                        break;
-                    }
-                    case right: {
-                        pnode->right = value;
-                        break;
-                    }
-                    case both: {
-                        pnode->left = pnode->right = value;
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
-        }
-
-        Path _get_parent_path(node_pointer pnode) {
-            node_pointer parent = pnode->parent;
-            Path parentPath = none;
-            if (parent) {
-                if (parent->left == pnode) {
-                    parentPath = left;
-                }
-                if (parent->right == pnode) {
-                    if (parentPath == left) {
-                        parentPath = both;
-                    } else {
-                        parentPath = right;
-                    }
-                }
-            }
-            return parentPath;
-        }
-
-        Path _get_leading_path(node_pointer pnode) {
-            Path leadingPath;
-            if (!pnode->left && !pnode->right) {
-                leadingPath = none;
-            } else if (pnode->left && !pnode->right) {
-                leadingPath = left;
-            } else if (!pnode->left && pnode->right) {
-                leadingPath = right;
-            } else {
-                leadingPath = both;
-            }
-            return leadingPath;
-        }
-
         node_pointer _subtree_min(node_pointer treap) const {
             while (treap->left) {
                 treap = treap->left;
@@ -846,25 +656,6 @@ namespace ft {
                     return _search(treap->right, value);
                 } else {
                     return treap;
-                }
-            }
-        }
-
-        void _insert(node_pointer& treap, node_pointer node, node_pointer prevNode = nullptr) {
-            if (!treap || treap == _header) {
-                _size++;
-                treap = node;
-                if (prevNode) {
-                    treap->parent = prevNode;
-                } else {
-                    treap->parent = _header;
-                    _header->right = _header->left = treap;
-                }
-            } else {
-                if (_cmp(node->value, treap->value)) {
-                    _insert(treap->left, node, treap);
-                } else if (_cmp(treap->value, node->value)) {
-                    _insert(treap->right, node, treap);
                 }
             }
         }

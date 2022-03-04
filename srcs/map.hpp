@@ -86,19 +86,6 @@ namespace ft {
 
         }
 
-    /* DELETE THIS */
-    void visualize() {
-        return _treap.visualize();
-    }
-
-    size_t depth() {
-        return _treap.depth();
-    }
-
-    void parent() {
-        _treap.test();
-    }
-
     /* Element access */
     public:
         mapped_type& at(const key_type& key) {
@@ -171,7 +158,6 @@ namespace ft {
             // return std::numeric_limits<difference_type>::max();
             // return _allocator.max_size(); Same problem, that in ft::vector
             return std::map<key_type, T>().max_size();
-
         }
 
     /* Modifiers */
