@@ -1,9 +1,8 @@
 # files for test
 app
 app.sh
-dtest.sh
 main_test.cpp
-ducha.cpp
+avl.sh
 
 #tester files
 srcs/tester/

@@ -24,19 +24,21 @@ namespace ft {
         typedef U value_type;
 
         value_type value;
+        size_t height;
         _node<value_type>* left;
         _node<value_type>* right;
         _node<value_type>* parent;
 
-        explicit _node(const value_type& value)  : value(value), left(nullptr), right(nullptr), parent(nullptr) {
+        explicit _node(const value_type& value)  : value(value), height(1), left(nullptr), right(nullptr), parent(nullptr) {
         }
 
-        _node(const _node& other) : value(other.value), left(other.left), right(other.right), parent(other.parent) {
+        _node(const _node& other) : value(other.value), height(1), left(other.left), right(other.right), parent(other.parent) {
         }
 
         _node& operator=(const _node& other) {
             if (this != &other) {
                 value = other.value;
+                height = other.height;
                 left = other.left;
                 right = other.right;
                 parent = other.parent;
@@ -217,6 +219,7 @@ namespace ft {
             _header = _node_allocator.allocate(1);
             _node_allocator.construct(_header, value_type());
             _root = _header;
+            // _root = nullptr;
         }
 
         Treap(const Treap& other) : _allocator(other._allocator), _node_allocator(other._node_allocator), _cmp(other._cmp), _size(0) {
@@ -286,6 +289,102 @@ namespace ft {
             return const_reverse_iterator(begin());
         }
 
+    void visualize(node_pointer _treap = nullptr, size_t depth = 0) {
+        if (depth == 0) {
+            _treap = _root;
+        }
+        if (_treap) {
+            visualize(_treap->left, depth + 1);
+            for (size_t i = 0; i < depth; ++i) {
+                std::cout << "-";
+            }
+            std::cout << _treap->value.first << '\n';
+            visualize(_treap->right, depth + 1);
+        }
+    }
+
+    void test() {
+        node_pointer temp = _root;
+        std::cout << "root->parent: " << _root->parent << " " << _header << std::endl;
+        std::cout << "root: " << _root->value.first << " addr: " << _root << std::endl;
+        while (temp->right) {
+            temp = temp->right;
+            std::cout << "down-> " << temp->value.first << std::endl;
+        }
+        std::cout << "root: " << _root << std::endl;
+        std::cout << "parent: " << temp->parent << std::endl;
+        while (temp->parent != _header) {
+            std::cout << "up-> " << temp->value.first << '\n';
+            temp = temp->parent;
+        }
+        std::cout << "end: " << temp->value.first << std::endl;
+    }
+
+    /* AVL TREE */
+    private:
+        size_type _height(node_pointer pnode) {
+            if (pnode) {
+                return pnode->height;
+            } else {
+                return 0;
+            }
+        }
+
+        int _bfactor(node_pointer pnode) {
+            return _height(pnode->right) - _height(pnode->left);
+        }
+
+        void _fix_height(node_pointer pnode) {
+            size_t hl = _height(pnode->left);
+            size_t hr = _height(pnode->right);
+            pnode->height = (hl > hr ? hl : hr) + 1;
+        }
+
+        node_pointer _rotate_right(node_pointer p) { //need to assign parents
+            node_pointer q = p->left;
+            q->parent = p->parent;
+            p->left = q->right;
+            if (q->right) {
+                q->right->parent = p;
+            }
+            q->right = p;
+            p->parent = q;
+            _fix_height(p);
+            _fix_height(q);
+            return q;
+        }
+
+        node_pointer _rotate_left(node_pointer q) {
+            node_pointer p = q->right;
+            p->parent = q->parent;
+            q->right = p->left;
+            if (p->left) {
+                p->left->parent = q;
+            }
+            p->left = q;
+            q->parent = p;
+            _fix_height(q);
+            _fix_height(p);
+            return p;
+        }
+
+        node_pointer _balance(node_pointer pnode) {
+            _fix_height(pnode);
+            if (_bfactor(pnode) == 2) {
+                if (_bfactor(pnode->right) < 0) {
+                    pnode->right = _rotate_right(pnode->right);
+                }
+                return _rotate_left(pnode);
+            }
+            if (_bfactor(pnode) == -2 ) {
+                if (_bfactor(pnode->left) > 0) {
+                    pnode->left = _rotate_left(pnode->left);
+                }
+                return _rotate_right(pnode);
+            }
+            return pnode;
+        }
+
     /* Capacity */
     public:
         size_type size() const {
@@ -301,6 +400,38 @@ namespace ft {
                 _root = _header;
                 _header->left = _header->right = nullptr;
             }
+        }
+
+        void insert_avl(const value_type& value) {
+            if (_root == _header) {
+                _root = __insert(nullptr, value);
+                _assign_paths_header(_root);
+                std::cout << "_header: " << _header << std::endl;
+            }
+            else if (!_search(_root, value)) {
+               _root = __insert(_root, value);
+                _assign_paths_header(_root);
+            }
+        }
+
+        node_pointer __insert(node_pointer root, const value_type& value) {
+            if (!root) {
+                root = _create_node(value);
+            } else {
+                if (_cmp(value, root->value)) {
+                    root->left = __insert(root->left, value);
+                    root->left->parent = root;
+                } else if (_cmp(root->value, value)) {
+                    root->right = __insert(root->right, value);
+                    root->right->parent = root;
+                }
+            }
+            return _balance(root);
+        }
+
+        void _assign_paths_header(node_pointer _root) {
+            _header->left = _header->right = _root;
+            _root->parent = _header;
         }
 
         ft::pair<iterator, bool> insert(const value_type& value) {
@@ -667,6 +798,7 @@ namespace ft {
                     _insert(treap->right, node, treap);
                 }
             }
+            _balance(treap);
         }
 
         void _delete_treap(node_pointer root) {

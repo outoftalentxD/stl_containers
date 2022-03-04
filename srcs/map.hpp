@@ -85,7 +85,14 @@ namespace ft {
         ~map() {
 
         }
+    /* DELETE THIS */
+    void visualize() {
+        return _treap.visualize();
+    }
 
+    void parent() {
+        _treap.test();
+    }
     /* Element access */
     public:
         mapped_type& at(const key_type& key) {
@@ -166,7 +173,9 @@ namespace ft {
         void clear() {
             _treap.clear();
         }
-
+        void insert_avl(const value_type& value) {
+            _treap.insert_avl(value);
+        }
         ft::pair<iterator, bool> insert(const value_type& value) {
             return _treap.insert(value);
         }
