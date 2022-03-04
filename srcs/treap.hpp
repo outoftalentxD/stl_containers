@@ -289,17 +289,28 @@ namespace ft {
             return const_reverse_iterator(begin());
         }
 
+    /* TO REMOVE */
+    size_t depth(node_pointer treap = nullptr, size_t depth = 0) {
+        if (depth == 0) {
+            treap = _root;
+        }
+        if (!treap) {
+            return 0;
+        }
+        return std::max(this->depth(treap->left, depth + 1), this->depth(treap->right, depth + 1)) + 1;
+    }
+
     void visualize(node_pointer _treap = nullptr, size_t depth = 0) {
         if (depth == 0) {
             _treap = _root;
         }
         if (_treap) {
-            visualize(_treap->left, depth + 1);
+            visualize(_treap->right, depth + 1);
             for (size_t i = 0; i < depth; ++i) {
-                std::cout << "-";
+                std::cout << "\t";
             }
             std::cout << _treap->value.first << '\n';
-            visualize(_treap->right, depth + 1);
+            visualize(_treap->left, depth + 1);
         }
     }
 
@@ -402,38 +413,6 @@ namespace ft {
             }
         }
 
-        void insert_avl(const value_type& value) {
-            if (_root == _header) {
-                _root = __insert(nullptr, value);
-                _assign_paths_header(_root);
-                std::cout << "_header: " << _header << std::endl;
-            }
-            else if (!_search(_root, value)) {
-               _root = __insert(_root, value);
-                _assign_paths_header(_root);
-            }
-        }
-
-        node_pointer __insert(node_pointer root, const value_type& value) {
-            if (!root) {
-                root = _create_node(value);
-            } else {
-                if (_cmp(value, root->value)) {
-                    root->left = __insert(root->left, value);
-                    root->left->parent = root;
-                } else if (_cmp(root->value, value)) {
-                    root->right = __insert(root->right, value);
-                    root->right->parent = root;
-                }
-            }
-            return _balance(root);
-        }
-
-        void _assign_paths_header(node_pointer _root) {
-            _header->left = _header->right = _root;
-            _root->parent = _header;
-        }
-
         ft::pair<iterator, bool> insert(const value_type& value) {
             node_pointer pnode = nullptr;
             if (_root != _header) {
@@ -442,7 +421,7 @@ namespace ft {
             if (pnode) {
                 return ft::make_pair(iterator(pnode), false);
             } else {
-                _insert(_root, _create_node(value));
+                _insert_avl(value);
                 return ft::make_pair(iterator(_search(_root, value)), true);
             }
         }
@@ -453,8 +432,14 @@ namespace ft {
         }
 
         size_type erase(iterator pos) {
-            --_size;
-            return _erase(pos.base());
+            if (pos != end()) {
+                _root = __erase(_root, pos.base()->value);
+                _assign_paths_header();
+                --_size;
+                return 1;
+            } else {
+                return 0;
+            }
         }
 
         void swap(Treap& other) {
@@ -540,6 +525,90 @@ namespace ft {
 
     /* private helpers */
     private:
+        node_pointer __erase(node_pointer pnode, const value_type& value) // удаление ключа k из дерева p
+        {
+            if(!pnode) {
+                return nullptr;
+            }
+            if(_cmp(value, pnode->value)) {
+                pnode->left = __erase(pnode->left, value);
+                if (pnode->left) {
+                    pnode->left->parent = pnode;
+                }
+            } else if(_cmp(pnode->value, value)) {
+                pnode->right = __erase(pnode->right, value);
+                if (pnode->right) {
+                    pnode->right->parent = pnode;
+                }
+            } else {
+                node_pointer q = pnode->left;
+                node_pointer r = pnode->right;
+                if (!r) {
+                    if (q) {
+                        q->parent = pnode->parent;
+                    }
+                    _delete_node(pnode);
+                    return q;
+                }
+                node_pointer min = _subtree_min(r);
+                min->right = __erase_subtree_min(r);
+                if (min->right) {
+                    min->right->parent = min;
+                }
+                min->left = q;
+                if (q) {
+                    q->parent = min;
+                }
+                return _balance(min);
+            }
+            return _balance(pnode);
+        }
+
+        node_pointer __erase_subtree_min(node_pointer p)
+        {
+            if (!p->left) {
+                return p->right;
+            }
+            p->left = __erase_subtree_min(p->left);
+            p->left->parent = p;
+            return _balance(p);
+        }
+
+        void _insert_avl(const value_type& value) {
+            if (_root == _header) {
+                _root = __insert(nullptr, value);
+                _assign_paths_header();
+                ++_size;
+            }
+            else if (!_search(_root, value)) {
+               _root = __insert(_root, value);
+                _assign_paths_header();
+                ++_size;
+            }
+        }
+
+        node_pointer __insert(node_pointer root, const value_type& value) {
+            if (!root) {
+                root = _create_node(value);
+            } else {
+                if (_cmp(value, root->value)) {
+                    root->left = __insert(root->left, value);
+                    root->left->parent = root;
+                } else if (_cmp(root->value, value)) {
+                    root->right = __insert(root->right, value);
+                    root->right->parent = root;
+                }
+            }
+            return _balance(root);
+        }
+
+        void _assign_paths_header() {
+            _header->left = _header->right = _root;
+            if (_root) {
+                _root->parent = _header;
+            }
+        }
+
         void _insert_all_nodes(node_pointer to, node_pointer from) {
             if (from) {
                 _insert(to, _create_node(from->value));
@@ -798,7 +867,6 @@ namespace ft {
                     _insert(treap->right, node, treap);
                 }
             }
-            _balance(treap);
         }
 
         void _delete_treap(node_pointer root) {
